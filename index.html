@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #1eff8b;
+    }
+    .video-box {
+      position: fixed;
+      overflow: hidden;
+      box-shadow: 0 0 1rem white;
+      opacity: 0.85;
+    }
+
+    .video-box .shadow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-color: white;
+      filter: blur(10px);
+    }
+
+    .video-box.horizontal {
+      aspect-ratio: 16/9;
+      width: 24vw;
+    }
+
+    .video-box.vertical {
+      aspect-ratio: 9/16;
+      width: 12vw;
+    }
+
+    iframe {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+      scale: 1.05;
+      filter: contrast(1.2) brightness(1.2);
+    }
+
+    .background {
+      position: fixed;
+      top: -3.5vw;
+      left: -0.5vw;
+      width: 120%;
+      height: 150dvh;
+      display: flex;
+      align-content: flex-start;
+      flex-wrap: wrap;
+      background-color: #1eff8b;
+    }
+    .background div {
+      width: 5.5vw;
+      height: 5.5vw;
+      box-shadow: inset 0 0 1.2rem rgba(255, 255, 255, 0.6);
+    }
+  </style>
+  <body>
+    <div class="video-container"></div>
+    <div class="background"></div>
+    <script>
+      const background = document.querySelector(".background");
+      for (let i = 0; i < 500; i++) {
+        const div = document.createElement("div");
+        background.appendChild(div);
+      }
+
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+      const videoUrls = [
+        ["https://www.youtube.com/shorts/uKRgGyWz4jg", "vertical"],
+        ["https://www.youtube.com/shorts/BOpEESk0cUo", "vertical"],
+        ["https://www.youtube.com/watch?v=1Kh9CTw6w-0", "horizontal"],
+        ["https://www.youtube.com/watch?v=PP928UALgIM", "horizontal"],
+        ["https://www.youtube.com/watch?v=ZGWbgj1zxhQ", "horizontal"],
+        ["https://www.youtube.com/shorts/Y2ofaZ_mV54", "vertical"],
+        ["https://www.youtube.com/watch?v=RkXcHnLt2GQ", "horizontal"],
+        ["https://www.youtube.com/watch?v=hKISkqO7n9w", "horizontal"],
+        ["https://www.youtube.com/watch?v=lwlG-LwUW_M", "vertical"],
+        ["https://www.youtube.com/watch?v=N_WMrnp08og", "horizontal"],
+        ["https://www.youtube.com/watch?v=bKWIpoJ7v7o", "horizontal"],
+        ["https://www.youtube.com/watch?v=Oehry1JC9Rk", "horizontal"],
+        ["https://www.youtube.com/watch?v=TaMThO4fJzo", "horizontal"],
+        ["https://www.youtube.com/watch?v=jCgv4JHk-Ts", "horizontal"],
+      ];
+
+      const playersCount = videoUrls.length;
+      let players = [];
+      let videoDisplayCount = 0;
+      let startVideo = 0;
+      let startVideoJump = 10;
+
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+
+      function onYouTubeIframeAPIReady() {
+        startVideoSequence();
+      }
+
+      function startVideoSequence() {
+        shuffleArray(videoUrls);
+        videoDisplayCount = 0;
+
+        for (let i = 0; i < playersCount; i++) {
+          setTimeout(() => {
+            createNewDivAndLoadVideo(i, i);
+          }, i * 1000 * 12.5);
+        }
+      }
+
+      function createNewDivAndLoadVideo(playerIndex, videoIndex) {
+        const scale = [0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15];
+        const randomScale = scale[Math.floor(Math.random() * scale.length)];
+        const offsetLeft = Math.floor(Math.random() * 70);
+        const offsetTop = Math.floor(Math.random() * 60);
+        const videoSize = videoUrls[videoIndex][1];
+
+        const newDiv = document.createElement("div");
+        const newDivShadow = document.createElement("div");
+        const newIframe = document.createElement("div");
+        newDiv.className = "video-box";
+        newDiv.classList.add(videoSize);
+        newDivShadow.className = "shadow";
+        newDiv.style.left = `${offsetLeft}%`;
+        newDiv.style.top = `${offsetTop}%`;
+        newDiv.style.transform = `scale(${randomScale})`;
+
+        const randomBorderRadius = `${Math.random() * 50}% ${
+          Math.random() * 50
+        }% ${Math.random() * 50}% ${Math.random() * 50}%`;
+        newDiv.style.borderRadius = randomBorderRadius;
+        newDivShadow.style.borderRadius = randomBorderRadius;
+        newIframe.id = "player" + (playerIndex + 1);
+        newDiv.appendChild(newDivShadow);
+        newDiv.appendChild(newIframe);
+        document.body.appendChild(newDiv);
+
+        const videoId = getVideoIdFromUrl(videoUrls[videoIndex][0]);
+        players[playerIndex] = new YT.Player(newIframe.id, {
+          videoId: videoId,
+          playerVars: { start: startVideo },
+          events: {
+            onReady: (event) => onPlayerReady(event, playerIndex),
+            onStateChange: (event) => onPlayerStateChange(event, playerIndex),
+          },
+        });
+      }
+
+      function onPlayerReady(event, playerIndex) {
+        const divVideo = document.getElementById("player" + (playerIndex + 1));
+        event.target.playVideo();
+        videoDisplayCount++;
+
+        const parentDiv = divVideo.parentElement;
+
+        if (videoDisplayCount === videoUrls.length) {
+          startVideo += startVideoJump;
+          if (startVideo < -1 || startVideo > 31) {
+            startVideoJump *= -1;
+          }
+
+          setTimeout(() => {
+            startVideoSequence();
+          }, 30000);
+        }
+        setTimeout(() => {
+          if (divVideo) {
+            divVideo.remove();
+          }
+        }, 60000);
+
+        setTimeout(() => {
+          if (parentDiv) {
+            parentDiv.remove();
+          }
+        }, 60000 * 5);
+      }
+
+      function onPlayerStateChange(event, playerIndex) {
+        if (event.data === YT.PlayerState.ENDED) {
+          const divVideo = document.getElementById(
+            "player" + (playerIndex + 1)
+          );
+          if (divVideo) {
+            divVideo.remove();
+          }
+        }
+      }
+
+      function getVideoIdFromUrl(url) {
+        const match = url.match(
+          /(?:v=|\/shorts\/|youtu.be\/|\/v\/|\/embed\/|&v=|\?v=|\&v=)([a-zA-Z0-9_-]{11})/
+        );
+        return match ? match[1] : null;
+      }
+    </script>
+  </body>
+</html>
