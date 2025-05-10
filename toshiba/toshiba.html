@@ -6,9 +6,13 @@
       padding: 0;
       box-sizing: border-box;
     }
-    body {
-      background-color: #1eff8b;
+    :root {
+      font-size: 0.83vw;
     }
+    body {
+      background-color: #fff673;
+    }
+
     .video-box {
       position: fixed;
       overflow: hidden;
@@ -27,12 +31,12 @@
 
     .video-box.horizontal {
       aspect-ratio: 16/9;
-      width: 24vw;
+      width: 28vw;
     }
 
     .video-box.vertical {
       aspect-ratio: 9/16;
-      width: 12vw;
+      width: 16vw;
     }
 
     iframe {
@@ -47,24 +51,42 @@
 
     .background {
       position: fixed;
-      top: -3.5vw;
-      left: -0.5vw;
+      top: -6rem;
+      left: -16rem;
       width: 120%;
       height: 150dvh;
       display: flex;
       align-content: flex-start;
       flex-wrap: wrap;
-      background-color: #1eff8b;
+      background-color: #fff673;
     }
+
     .background div {
-      width: 5.5vw;
-      height: 5.5vw;
-      box-shadow: inset 0 0 1.2rem rgba(255, 255, 255, 0.6);
+      width: 8rem;
+      height: 8rem;
+      box-shadow: inset 0 0 1rem rgba(255, 255, 255, 1);
+    }
+
+    #startButton {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      z-index: 9999;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      background-color: white;
+      color: black;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 0 1rem rgba(0, 0, 0, 0.3);
+      border-radius: 0.5rem;
     }
   </style>
   <body>
     <div class="video-container"></div>
     <div class="background"></div>
+    <button id="startButton">Começar Vídeos</button>
+
     <script>
       const background = document.querySelector(".background");
       for (let i = 0; i < 500; i++) {
@@ -88,7 +110,6 @@
         ["https://www.youtube.com/watch?v=hKISkqO7n9w", "horizontal"],
         ["https://www.youtube.com/watch?v=lwlG-LwUW_M", "vertical"],
         ["https://www.youtube.com/watch?v=N_WMrnp08og", "horizontal"],
-        ["https://www.youtube.com/watch?v=bKWIpoJ7v7o", "horizontal"],
         ["https://www.youtube.com/watch?v=Oehry1JC9Rk", "horizontal"],
         ["https://www.youtube.com/watch?v=TaMThO4fJzo", "horizontal"],
         ["https://www.youtube.com/watch?v=jCgv4JHk-Ts", "horizontal"],
@@ -108,7 +129,13 @@
       }
 
       function onYouTubeIframeAPIReady() {
-        startVideoSequence();
+        const startButton = document.getElementById("startButton");
+        startButton.addEventListener("click", () => {
+          startButton.remove();
+          setTimeout(() => {
+            startVideoSequence();
+          }, 5000);
+        });
       }
 
       function startVideoSequence() {
@@ -123,7 +150,7 @@
       }
 
       function createNewDivAndLoadVideo(playerIndex, videoIndex) {
-        const scale = [0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15];
+        const scale = [0.9, 0.95, 1, 1.05, 1.1];
         const randomScale = scale[Math.floor(Math.random() * scale.length)];
         const offsetLeft = Math.floor(Math.random() * 70);
         const offsetTop = Math.floor(Math.random() * 60);
